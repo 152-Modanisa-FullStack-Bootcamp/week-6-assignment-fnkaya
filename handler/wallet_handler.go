@@ -48,7 +48,7 @@ func (wh *WalletHandler) handleGetRequest(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	json, err := json.Marshal(response)
+	jsonResponse, err := json.Marshal(response)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))
@@ -56,7 +56,7 @@ func (wh *WalletHandler) handleGetRequest(w http.ResponseWriter, r *http.Request
 	}
 
 	w.Header().Add("content-type", "application/json")
-	w.Write(json)
+	w.Write(jsonResponse)
 }
 
 func (wh *WalletHandler) handlePutRequest(w http.ResponseWriter, r *http.Request) {
@@ -75,30 +75,36 @@ func (wh *WalletHandler) handlePostRequest(w http.ResponseWriter, r *http.Reques
 	b, err := io.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
 		return
 	}
+	defer r.Body.Close()
+
 	requestModel := &model.RequestModel{}
 	err = json.Unmarshal(b, requestModel)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	response, err := wh.walletService.ChangeBalance(param, requestModel.Balance)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	json, err := json.Marshal(response)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))
 		return
 	}
 
+	response, err := wh.walletService.ChangeBalance(param, requestModel.Balance)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	jsonResponse, err := json.Marshal(response)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 	w.Header().Add("content-type", "application/json")
-	w.Write(json)
+	w.Write(jsonResponse)
 }
 
 func NewWalletHandler(service service.IWalletService) IWalletHandler {

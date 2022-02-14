@@ -126,14 +126,20 @@ func TestNewWalletService_ChangeBalance_ValidOperation(t *testing.T) {
 	responseModel := model.ResponseModel{Username: "Ahmet", Balance: 0}
 
 	mockRepository := mock.NewMockIWalletRepository(gomock.NewController(t))
-
+	mockRepository.EXPECT().
+		Exists(responseModel.Username).
+		Return(true).
+		Times(1)
 	mockRepository.EXPECT().
 		GetBalance(responseModel.Username).
 		Return(responseModel).
 		Times(1)
+	mockRepository.EXPECT().
+		ChangeBalance(responseModel.Username, responseModel.Balance).
+		Times(1)
 
 	srv := service.NewWalletService(mockRepository)
-	_, err := srv.ChangeBalance(responseModel.Username, -100)
+	_, err := srv.ChangeBalance(responseModel.Username, 0)
 
 	assert.Nil(t, err)
 }

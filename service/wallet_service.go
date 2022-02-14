@@ -51,7 +51,7 @@ func (ws *WalletService) ChangeBalance(username string, amount int) (model.Respo
 	if newBalance < config.GetConfig().MinimumAmount {
 		return response, errors.New("not enough amount")
 	} else {
-		ws.ChangeBalance(username, amount)
+		ws.walletRepository.ChangeBalance(username, amount)
 		return response, nil
 	}
 }
